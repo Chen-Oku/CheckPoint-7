@@ -71,7 +71,7 @@ public class ServerConnectionManager : MonoBehaviourPunCallbacks
     {
         Debug.Log($"3. Usuario seleccionó conectar a: {regionCode}");
 
-        HasUserSelectedRegion = true;
+        HasUserSelectedRegion = true; //
 
         // --- NUEVO: DISPARAR EVENTO DE INTERFAZ ---
         // Avisamos a los suscriptores (la UI) que ya se eligió una región.

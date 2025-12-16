@@ -31,20 +31,18 @@ public class PlayerPickupController : MonoBehaviourPun
 
     private void TryPickup()
     {
-        // Usamos una esfera invisible alrededor del jugador
-        // Esto crea una lista de todo lo que tocamos en el layer "Interactable"
         Collider[] colliders = Physics.OverlapSphere(transform.position, pickupRadius, interactLayer);
 
         PhotonView closestTarget = null;
         float closestDistance = float.MaxValue;
 
-        // Buscamos cuál de todos los objetos tocados es el más cercano
         foreach (Collider col in colliders)
         {
             PhotonView targetView = col.GetComponent<PhotonView>();
 
-            // Solo nos interesan objetos con PhotonView y que no sean yo mismo (por si acaso)
-            if (targetView != null && targetView != photonView)
+            // VERIFICACIÓN EXTRA: && targetView.ViewID != 0
+            // Si el ViewID es 0, ignoramos el objeto porque está "roto" para Photon.
+            if (targetView != null && targetView != photonView && targetView.ViewID != 0)
             {
                 float distance = Vector3.Distance(transform.position, col.transform.position);
                 if (distance < closestDistance)
@@ -55,13 +53,17 @@ public class PlayerPickupController : MonoBehaviourPun
             }
         }
 
-        // Si encontramos algo válido cerca...
         if (closestTarget != null)
         {
-            // Pedimos permiso (Ownership)
-            closestTarget.RequestOwnership();
+            // OTRA SEGURIDAD:
+            // Solo pedimos dueño si el objeto permite ser robado (OwnershipTransfer != Fixed)
+            // O si ya somos dueños, no pedimos nada.
+            if (!closestTarget.IsMine)
+            {
+                closestTarget.RequestOwnership();
+            }
 
-            // Ejecutamos el RPC para que todos vean que lo agarré
+            // IMPORTANTE: Enviamos el ID al RPC
             photonView.RPC("RPC_PickupItem", RpcTarget.All, closestTarget.ViewID);
         }
     }
