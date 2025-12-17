@@ -22,7 +22,7 @@ GameObject:
   - component: {fileID: 4878749791708702763}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -163,7 +163,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7a311065c5c4d64485157e54ae0aacd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
-  speed: 5
+  speed: 10
   turnSpeed: 720
 --- !u!114 &4896913308396621748
 MonoBehaviour:

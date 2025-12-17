@@ -150,5 +150,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c525c47f097eb549af3492f69abb986, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TopDownCameraFollow
-  offset: {x: 0, y: 15, z: -10}
+  offset: {x: 0, y: 20, z: -25}
   smoothSpeed: 5

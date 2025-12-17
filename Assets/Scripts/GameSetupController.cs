@@ -37,7 +37,7 @@ public class GameSetupController : MonoBehaviourPunCallbacks
         // Evitar doble spawn si se llama dos veces por accidente
         if (GameObject.Find(playerPrefabName + "(Clone)") != null) return;
 
-        Vector3 randomPosition = new Vector3(Random.Range(-5f, 5f), 1f, Random.Range(-5f, 5f));
+        Vector3 randomPosition = new Vector3(Random.Range(-2f, 2f), 1f, Random.Range(-2f, 2f));
         PhotonNetwork.Instantiate(playerPrefabName, randomPosition, Quaternion.identity);
 
         Debug.Log("Jugador instanciado correctamente.");
