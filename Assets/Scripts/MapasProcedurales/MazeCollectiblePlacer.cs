@@ -20,7 +20,10 @@ public class MazeCollectiblePlacer : MonoBehaviour
         if (collectiblePrefab == null) return;
         if (cells == null || cells.Length == 0) return;
 
-        bool spawnInNetwork = PhotonNetwork.IsConnected && PhotonNetwork.IsMasterClient;
+        // Si estamos conectados a Photon, queremos que SOLO el MasterClient cree los objetos de sala.
+        // Por eso pasamos "spawnInNetwork = PhotonNetwork.IsConnected" y el método
+        // SpawnCollectibleAtCell internamente evita la creación cuando no es MasterClient.
+        bool spawnInNetwork = PhotonNetwork.IsConnected;
 
         // Construir lista candidata: filtrar por distancia euclidiana mínima al jugador si es posible
         Vector3 playerPos = Vector3.zero;
@@ -67,6 +70,8 @@ public class MazeCollectiblePlacer : MonoBehaviour
             if (spawned >= maxCollectibles) break;
             if (Random.value <= collectibleSpawnProbability)
             {
+                // Debug: indicar intención de spawn y si será por red o local
+                Debug.Log($"MazeCollectiblePlacer: intentando spawn en celda {c.transform.position} (network={spawnInNetwork})");
                 SpawnCollectibleAtCell(c, spawnInNetwork);
                 spawned++;
             }

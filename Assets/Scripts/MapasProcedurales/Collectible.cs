@@ -22,14 +22,25 @@ public class Collectible : MonoBehaviourPun
     void OnTriggerEnter(Collider other)
     {
         if (pickedUp) return;
-        if (!other.CompareTag("Player")) return;
+        if (!other.CompareTag("Player"))
+        {
+            Debug.Log($"Collectible: trigger collided with '{other.name}' but tag is not 'Player'.");
+            return;
+        }
 
         // obtener PhotonView del jugador (en padre o en el mismo)
         var pv = other.GetComponentInParent<PhotonView>();
+        if (pv == null)
+        {
+            Debug.Log($"Collectible: no PhotonView encontrado en '{other.name}' o sus padres.");
+            return;
+        }
         if (pv == null) return;
 
         // solo el jugador local (owner) solicita recoger
         if (!pv.IsMine) return;
+
+        Debug.Log($"Collectible: jugador local (actor {pv.OwnerActorNr}) intentó recoger collectible '{gameObject.name}'. Enviando RPC a MasterClient.");
 
         // solicitar al MasterClient que valide y procese el pickup
         photonView.RPC(nameof(RPC_RequestPickup), RpcTarget.MasterClient, pv.OwnerActorNr);
