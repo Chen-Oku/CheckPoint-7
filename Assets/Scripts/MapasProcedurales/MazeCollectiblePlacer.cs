@@ -14,6 +14,28 @@ public class MazeCollectiblePlacer : MonoBehaviour
     [Tooltip("Distancia mínima (unidades mundo) desde el jugador para permitir spawn de collectibles.")]
     public float minDistanceFromPlayer = 5f;
 
+    void Start()
+    {
+        if (collectiblePrefab == null) return;
+
+        if (PhotonNetwork.IsConnected)
+        {
+            // Verificar que el prefab tenga PhotonView si vamos a instanciar por red
+            var pv = collectiblePrefab.GetComponent<PhotonView>();
+            if (pv == null)
+            {
+                Debug.LogWarning($"MazeCollectiblePlacer: collectiblePrefab '{collectiblePrefab.name}' no tiene PhotonView. Si usas Photon, añade PhotonView al prefab o la instancia fallará en red.");
+            }
+
+            // Verificar si existe en Resources (requisito para PhotonNetwork.InstantiateRoomObject)
+            var res = Resources.Load<GameObject>(collectiblePrefab.name);
+            if (res == null)
+            {
+                Debug.LogWarning($"MazeCollectiblePlacer: no se encontró '{collectiblePrefab.name}' en Resources. Si usas Photon room instantiation, coloca el prefab dentro de Assets/Resources.");
+            }
+        }
+    }
+
     // Coloca collectibles distribuídos por las celdas
     public void PlaceCollectiblesDistributed(MazeCell[] cells, MazeGoalPlacer goalPlacer = null)
     {
@@ -119,7 +141,7 @@ public class MazeCollectiblePlacer : MonoBehaviour
             }
         }
 
-        bool spawnInNetwork = PhotonNetwork.IsConnected && PhotonNetwork.IsMasterClient;
+        bool spawnInNetwork = PhotonNetwork.IsConnected;
 
         if (!found)
         {

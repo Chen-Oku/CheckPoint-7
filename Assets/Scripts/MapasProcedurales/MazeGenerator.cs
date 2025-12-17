@@ -2,8 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Photon.Pun;
+using ExitGames.Client.Photon;
 
-public class MazeGenerator : MonoBehaviour
+public class MazeGenerator : MonoBehaviourPunCallbacks
 {
     [SerializeField]
     private MazeCell _mazeCellPrefab;
@@ -22,20 +24,139 @@ public class MazeGenerator : MonoBehaviour
 
     private MazeCell[,] _mazeGrid;
 
+    [Header("Multiplayer")]
+    [Tooltip("Si >0 y 'expectedPlayers' está configurado, el MasterClient esperará a que se unan este número de jugadores antes de fijar la seed.")]
+    public int expectedPlayers = 0;
+
+    [Tooltip("Si true, el MasterClient esperará a que Player.CustomProperties[playerSpawnedPropKey] == true para todos los jugadores antes de iniciar la generación.")]
+    public bool waitForPlayersSpawnProp = true;
+    [Tooltip("Clave de la propiedad de jugador que indica que su avatar ya se instanció/spawneó (ej: 'spawned').")]
+    public string playerSpawnedPropKey = "spawned";
+
+    bool hasGenerated = false;
+
     void Start()
     {
-        if (_useSeed)
+        _mazeGrid = new MazeCell[_mazeWitdth, _mazeDepth];
+
+        if (PhotonNetwork.IsConnected)
         {
-            Random.InitState(_seed);
+            if (PhotonNetwork.IsMasterClient)
+            {
+                if (PhotonNetwork.CurrentRoom != null && PhotonNetwork.CurrentRoom.CustomProperties != null && PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue("mazeSeed", out object seedObj))
+                {
+                    int seed = (int)seedObj;
+                    Debug.Log($"MazeGenerator (Master): found existing mazeSeed={seed}, generating...");
+                    Random.InitState(seed);
+                    DoGenerate();
+                }
+                else
+                {
+                    StartCoroutine(MasterSetupSeedAndGenerate());
+                }
+            }
+            else
+            {
+                if (PhotonNetwork.CurrentRoom != null && PhotonNetwork.CurrentRoom.CustomProperties != null && PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue("mazeSeed", out object seedObj))
+                {
+                    int seed = (int)seedObj;
+                    Debug.Log($"MazeGenerator (Client): received mazeSeed={seed}, generating...");
+                    Random.InitState(seed);
+                    DoGenerate();
+                }
+                else
+                {
+                    Debug.Log("MazeGenerator: esperando mazeSeed del MasterClient...");
+                }
+            }
         }
         else
         {
-            int randomSeed = Random.Range(1, 1000000);
-            Random.InitState(randomSeed);
-
-            Debug.Log(randomSeed);
+            int seedVal;
+            if (_useSeed)
+            {
+                seedVal = _seed;
+            }
+            else
+            {
+                seedVal = Random.Range(1, 1000000);
+                Debug.Log($"MazeGenerator (Offline): seed={seedVal}");
+            }
+            Random.InitState(seedVal);
+            DoGenerate();
         }
-        _mazeGrid = new MazeCell[_mazeWitdth, _mazeDepth];
+    }
+
+    IEnumerator MasterSetupSeedAndGenerate()
+    {
+        if (expectedPlayers > 0)
+        {
+            Debug.Log($"MazeGenerator (Master): esperando {expectedPlayers} players en la sala...");
+            while (PhotonNetwork.CurrentRoom == null || PhotonNetwork.CurrentRoom.PlayerCount < expectedPlayers)
+            {
+                yield return new WaitForSeconds(0.5f);
+            }
+        }
+
+        if (waitForPlayersSpawnProp)
+        {
+            Debug.Log("MazeGenerator (Master): esperando que todos los jugadores marquen su propiedad de spawn...");
+            bool allSpawned = false;
+            while (!allSpawned)
+            {
+                allSpawned = true;
+                foreach (var p in PhotonNetwork.PlayerList)
+                {
+                    if (p.CustomProperties == null || !p.CustomProperties.TryGetValue(playerSpawnedPropKey, out object val) || !(val is bool) || !(bool)val)
+                    {
+                        allSpawned = false;
+                        break;
+                    }
+                }
+                if (!allSpawned) yield return new WaitForSeconds(0.5f);
+            }
+        }
+
+        int seedVal;
+        if (_useSeed)
+        {
+            seedVal = _seed;
+        }
+        else
+        {
+            seedVal = Random.Range(1, 1000000);
+        }
+
+        var props = new ExitGames.Client.Photon.Hashtable { { "mazeSeed", seedVal } };
+        PhotonNetwork.CurrentRoom?.SetCustomProperties(props);
+        Debug.Log($"MazeGenerator (Master): publicado mazeSeed={seedVal}");
+
+        Random.InitState(seedVal);
+        DoGenerate();
+    }
+
+    public override void OnRoomPropertiesUpdate(ExitGames.Client.Photon.Hashtable propertiesThatChanged)
+    {
+        base.OnRoomPropertiesUpdate(propertiesThatChanged);
+        if (hasGenerated) return;
+        if (propertiesThatChanged == null) return;
+        if (propertiesThatChanged.ContainsKey("mazeSeed"))
+        {
+            object obj = null;
+            if (PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue("mazeSeed", out obj))
+            {
+                int seed = (int)obj;
+                Debug.Log($"MazeGenerator: recibida mazeSeed={seed} por OnRoomPropertiesUpdate, generando...");
+                Random.InitState(seed);
+                DoGenerate();
+            }
+        }
+    }
+
+    void DoGenerate()
+    {
+        if (hasGenerated) return;
+        hasGenerated = true;
 
         for (int x = 0; x < _mazeWitdth; x++)
         {
@@ -51,7 +172,6 @@ public class MazeGenerator : MonoBehaviour
         {
             GenerateMaze(null, _mazeGrid[0, 0]);
 
-            // --- CAMBIO: colocar el goal AUTOMÁTICAMENTE al terminar la generación ---
             var placer = Object.FindAnyObjectByType<MazeGoalPlacer>();
             if (placer != null)
             {
@@ -62,11 +182,9 @@ public class MazeGenerator : MonoBehaviour
                 Debug.LogWarning("MazeGenerator: no MazeGoalPlacer encontrado en la escena. El goal no fue colocado.");
             }
 
-            // Intentar colocar collectibles usando MazeCollectiblePlacer si existe
             var collectiblePlacer = Object.FindAnyObjectByType<MazeCollectiblePlacer>();
             if (collectiblePlacer != null)
             {
-                // construir array plano de celdas desde la grilla
                 var list = new List<MazeCell>();
                 for (int x = 0; x < _mazeWitdth; x++)
                 {
