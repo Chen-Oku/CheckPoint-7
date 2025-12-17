@@ -3,6 +3,7 @@ using Photon.Pun;
 using UnityEngine;
 using Photon.Realtime;
 using System.Collections.Generic;
+using Random = UnityEngine.Random;
 
 public class ServerConnectionManager : MonoBehaviourPunCallbacks
 {
@@ -45,6 +46,10 @@ public class ServerConnectionManager : MonoBehaviourPunCallbacks
         PhotonNetwork.PhotonServerSettings.AppSettings.FixedRegion = string.Empty;
         // Esto hace que si el Master carga el nivel 'Mapa1', todos carguen 'Mapa1'
         PhotonNetwork.AutomaticallySyncScene = true;
+
+        // Si ya se guardo el nombre, asignarlo antes de conectar
+        PhotonNetwork.NickName = PlayerPrefs.GetString("playerName", "Player" + Random.Range(1000,9999));
+
         // Conecta usando la configuración del AppID
         PhotonNetwork.ConnectUsingSettings();
     }
