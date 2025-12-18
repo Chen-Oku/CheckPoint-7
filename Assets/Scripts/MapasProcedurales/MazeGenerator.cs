@@ -39,6 +39,13 @@ public class MazeGenerator : MonoBehaviourPunCallbacks
     {
         _mazeGrid = new MazeCell[_mazeWitdth, _mazeDepth];
 
+        // Si no se ha configurado `expectedPlayers` en el inspector, usar el valor de la sala (MaxPlayers)
+        if (PhotonNetwork.IsConnected && PhotonNetwork.CurrentRoom != null && expectedPlayers <= 0)
+        {
+            expectedPlayers = PhotonNetwork.CurrentRoom.MaxPlayers;
+            Debug.Log($"MazeGenerator: expectedPlayers ajustado desde Room.MaxPlayers = {expectedPlayers}");
+        }
+
         if (PhotonNetwork.IsConnected)
         {
             if (PhotonNetwork.IsMasterClient)

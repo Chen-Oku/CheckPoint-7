@@ -69,13 +69,13 @@ public class LobbyRoomManager : MonoBehaviourPunCallbacks
 
     // --- CREAR / UNIR ---
 
-    public void CreateGameRoom(string roomName)
+    public void CreateGameRoom(string roomName, int maxPlayers)
     {
         if (string.IsNullOrEmpty(roomName)) return;
 
         RoomOptions options = new RoomOptions
         {
-            MaxPlayers = 4,
+            MaxPlayers = (byte)Mathf.Clamp(maxPlayers, 2, 255),
             IsVisible = true,
             IsOpen = true,
             EmptyRoomTtl = 0
@@ -102,16 +102,28 @@ public class LobbyRoomManager : MonoBehaviourPunCallbacks
         // Avisamos a la UI para que oculte el panel del Lobby
         if (OnJoinedGameRoom != null) OnJoinedGameRoom.Invoke();
 
-        // Cargamos la escena del juego.
-        if (PhotonNetwork.IsMasterClient)
+        // No cargamos la escena aquí al entrar: el MasterClient iniciará la partida
+        // cuando la sala esté completa (ver OnPlayerEnteredRoom).
+        Debug.Log($"Sala MaxPlayers={PhotonNetwork.CurrentRoom.MaxPlayers}, PlayerCount={PhotonNetwork.CurrentRoom.PlayerCount}");
+    }
+
+    public override void OnPlayerEnteredRoom(Player newPlayer)
+    {
+        base.OnPlayerEnteredRoom(newPlayer);
+
+        // Solo el MasterClient decide cuándo iniciar la partida
+        if (!PhotonNetwork.IsMasterClient) return;
+
+        int current = PhotonNetwork.CurrentRoom.PlayerCount;
+        int capacity = PhotonNetwork.CurrentRoom.MaxPlayers;
+
+        Debug.Log($"OnPlayerEnteredRoom: now {current}/{capacity}");
+
+        if (current >= capacity)
         {
-            Debug.Log("Soy Master Client. Cargando escena de juego...");
-            // Asegúrate que "GameScene" sea el nombre EXACTO de tu archivo de escena
+            Debug.Log("Room completa — MasterClient cargando escena de juego");
             PhotonNetwork.LoadLevel("02_GameScene");
         }
-
-        // Los clientes no hacen nada, Photon los sincroniza automáticamente 
-        // porque activamos AutomaticallySyncScene en el Manager anterior.
     }
 
     public override void OnCreateRoomFailed(short returnCode, string message) => Debug.LogError("Error Crear: " + message);

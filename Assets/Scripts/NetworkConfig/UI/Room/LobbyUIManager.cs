@@ -10,6 +10,7 @@ public class LobbyUIManager : MonoBehaviour
 
     [Header("Panel Izquierdo (Crear)")]
     [SerializeField] private TMP_InputField roomNameInput;
+    [SerializeField] private TMP_InputField maxPlayersInput; // nuevo: cifra de jugadores al crear
 
     [Header("Panel Derecho (Lista)")]
     [SerializeField] private Transform roomListContainer; // El Content del ScrollView
@@ -42,10 +43,16 @@ public class LobbyUIManager : MonoBehaviour
     public void OnClickCreateRoom()
     {
         string name = roomNameInput.text;
-        if (!string.IsNullOrEmpty(name))
+        if (string.IsNullOrEmpty(name)) return;
+
+        int maxPlayers = 4;
+        if (maxPlayersInput != null && !string.IsNullOrEmpty(maxPlayersInput.text))
         {
-            LobbyRoomManager.Instance.CreateGameRoom(name);
+            int.TryParse(maxPlayersInput.text, out maxPlayers);
+            if (maxPlayers < 2) maxPlayers = 2;
         }
+
+        LobbyRoomManager.Instance.CreateGameRoom(name, maxPlayers);
     }
 
     // --- VISUALIZACIÓN ---

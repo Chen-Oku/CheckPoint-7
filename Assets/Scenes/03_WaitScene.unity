@@ -524,7 +524,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!64 &1491394511
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -663,95 +663,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameSetupController
   playerPrefabName: Player
---- !u!1 &1999363822
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1999363824}
-  - component: {fileID: 1999363823}
-  - component: {fileID: 1999363825}
-  - component: {fileID: 1999363826}
-  m_Layer: 0
-  m_Name: MazeGenerator
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1999363823
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1999363822}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 42c9cb3d0342ec94f846f8c3850ca22a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MazeGenerator
-  _mazeCellPrefab: {fileID: 2966371088129233874, guid: b440a86150da9424baf676231e9fd51b, type: 3}
-  _mazeWitdth: 10
-  _mazeDepth: 10
-  _seed: 5
-  _useSeed: 0
-  expectedPlayers: 1
-  waitForPlayersSpawnProp: 1
-  playerSpawnedPropKey: spawned
---- !u!4 &1999363824
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1999363822}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 5, y: 5, z: 5}
-  m_ConstrainProportionsScale: 1
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1999363825
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1999363822}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e41a1caf350dbfe43a6dd756f9a401c8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MazeGoalPlacer
-  goalPrefab: {fileID: 1747632937906771344, guid: a9cd0c68a3e13bc49a37dc93e33aa7b9, type: 3}
-  playerTransform: {fileID: 0}
-  cellsParent: {fileID: 1140829936772776579, guid: b440a86150da9424baf676231e9fd51b, type: 3}
-  placeYOffset: 0.5
-  preferPathDistance: 1
-  destroyExisting: 1
---- !u!114 &1999363826
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1999363822}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 829042c060d473548ab1a200a2fb600b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MazeCollectiblePlacer
-  collectiblePrefab: {fileID: 3499093527137947750, guid: 7c3216dade76ee8428e97306e6a88795, type: 3}
-  collectibleSpawnProbability: 0.808
-  maxCollectibles: 2
-  placeYOffset: 0.5
-  minDistanceFromPlayer: 5
 --- !u!1001 &253154403282490634
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -895,4 +806,3 @@ SceneRoots:
   - {fileID: 1066834455}
   - {fileID: 955148921}
   - {fileID: 930029877}
-  - {fileID: 1999363824}
