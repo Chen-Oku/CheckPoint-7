@@ -30,6 +30,8 @@ public class MazeGenerator : MonoBehaviourPunCallbacks
 
     [Tooltip("Si true, el MasterClient esperará a que Player.CustomProperties[playerSpawnedPropKey] == true para todos los jugadores antes de iniciar la generación.")]
     public bool waitForPlayersSpawnProp = true;
+    [Tooltip("Tiempo máximo (segundos) a esperar por la propiedad 'spawned' antes de continuar (0 = esperar indefinidamente).")]
+    public float playersSpawnWaitTimeout = 10f;
     [Tooltip("Clave de la propiedad de jugador que indica que su avatar ya se instanció/spawneó (ej: 'spawned').")]
     public string playerSpawnedPropKey = "spawned";
 
@@ -109,6 +111,7 @@ public class MazeGenerator : MonoBehaviourPunCallbacks
         {
             Debug.Log("MazeGenerator (Master): esperando que todos los jugadores marquen su propiedad de spawn...");
             bool allSpawned = false;
+            float waited = 0f;
             while (!allSpawned)
             {
                 allSpawned = true;
@@ -120,7 +123,16 @@ public class MazeGenerator : MonoBehaviourPunCallbacks
                         break;
                     }
                 }
-                if (!allSpawned) yield return new WaitForSeconds(0.5f);
+                if (allSpawned) break;
+
+                if (playersSpawnWaitTimeout > 0f && waited >= playersSpawnWaitTimeout)
+                {
+                    Debug.LogWarning($"MazeGenerator (Master): timeout esperando 'spawned' after {playersSpawnWaitTimeout}s — continuando generación.");
+                    break;
+                }
+
+                yield return new WaitForSeconds(0.5f);
+                waited += 0.5f;
             }
         }
 
