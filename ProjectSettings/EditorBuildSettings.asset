@@ -11,9 +11,6 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/02_GameScene.unity
     guid: 8c71904298bdb45428b4523509022481
-  - enabled: 1
-    path: Assets/Scenes/03_WaitScene.unity
-    guid: 44640454f26a6b2429ffef97fdee7c31
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: 18e35394db1a7e54d877e5ba59dce625, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

@@ -9,6 +9,9 @@ public class MazeGoalPlacer : MonoBehaviour
     [Tooltip("Transform del jugador local. Si no se asigna intentará buscar el tagged 'Player'.")]
     public Transform playerTransform;
 
+    [Tooltip("Transform que representa el punto de inicio de la generación del maze (opcional).")]
+    public Transform mazeStartTransform;
+
     [Tooltip("Padre que contiene las celdas/posiciones del laberinto (opcional).")]
     public Transform cellsParent;
 
@@ -123,14 +126,19 @@ public class MazeGoalPlacer : MonoBehaviour
     void PlaceByEuclidean(List<Transform> cells)
     {
         if (cells == null || cells.Count == 0) return;
-        Vector3 playerPos = playerTransform != null ? playerTransform.position : Vector3.zero;
+
+        // referencia: jugador si está asignado, si no usar mazeStartTransform, si no fallback a la primera celda
+        Vector3 refPos;
+        if (playerTransform != null) refPos = playerTransform.position;
+        else if (mazeStartTransform != null) refPos = mazeStartTransform.position;
+        else refPos = cells[0].position;
 
         Transform far = null;
         float bestDist = float.MinValue;
         foreach (var t in cells)
         {
             if (t == null) continue;
-            float d = Vector3.SqrMagnitude(t.position - playerPos);
+            float d = Vector3.SqrMagnitude(t.position - refPos);
             if (d > bestDist)
             {
                 bestDist = d;
@@ -144,12 +152,18 @@ public class MazeGoalPlacer : MonoBehaviour
     MazeCell FindClosestCellToPlayer(MazeCell[] cells)
     {
         if (cells == null || cells.Length == 0) return null;
-        if (playerTransform == null) return cells[0];
+
+        // referencia: jugador si está asignado, si no usar mazeStartTransform, si no fallback a la primera celda
+        Vector3 refPos;
+        if (playerTransform != null) refPos = playerTransform.position;
+        else if (mazeStartTransform != null) refPos = mazeStartTransform.position;
+        else return cells[0];
+
         MazeCell best = null;
         float bestD = float.MaxValue;
         foreach (var c in cells)
         {
-            float d = Vector3.SqrMagnitude(c.transform.position - playerTransform.position);
+            float d = Vector3.SqrMagnitude(c.transform.position - refPos);
             if (d < bestD)
             {
                 bestD = d;

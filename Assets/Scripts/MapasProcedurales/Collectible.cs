@@ -37,8 +37,19 @@ public class Collectible : MonoBehaviourPun
         }
         if (pv == null) return;
 
-        // solo el jugador local (owner) solicita recoger
+        // solo el jugador local solicita recoger
         if (!pv.IsMine) return;
+
+        // Prevención cliente: si el jugador local ya tiene la propiedad, no solicitar otro
+        var localProps = PhotonNetwork.LocalPlayer.CustomProperties;
+        if (localProps != null && localProps.ContainsKey(playerPropertyKey))
+        {
+            if (localProps[playerPropertyKey] is bool has && has)
+            {
+                Debug.Log($"Collectible: jugador local ya tiene '{playerPropertyKey}=true', no podrá recoger otro.");
+                return;
+            }
+        }
 
         Debug.Log($"Collectible: jugador local (actor {pv.OwnerActorNr}) intentó recoger collectible '{gameObject.name}'. Enviando RPC a MasterClient.");
 
@@ -53,15 +64,29 @@ public class Collectible : MonoBehaviourPun
         if (!PhotonNetwork.IsMasterClient) return;
         if (pickedUp) return;
 
+        // obtener jugador objetivo
+        var target = PhotonNetwork.CurrentRoom?.GetPlayer(actorNr);
+        if (target == null) return;
+
+        // Comprobación autoritativa: si ya tiene la propiedad, rechazar
+        var targetProps = target.CustomProperties;
+        if (targetProps != null && targetProps.ContainsKey(playerPropertyKey))
+        {
+            if (targetProps[playerPropertyKey] is bool already && already)
+            {
+                Debug.Log($"Collectible (Master): actor {actorNr} ya tiene '{playerPropertyKey}=true', ignorando petición.");
+                // opcional: avisar al cliente solicitante
+                photonView.RPC(nameof(RPC_PickupDenied), RpcTarget.All, actorNr);
+                return;
+            }
+        }
+
+        // procesar pickup
         pickedUp = true;
 
         // asignar la propiedad al jugador objetivo
-        var target = PhotonNetwork.CurrentRoom?.GetPlayer(actorNr);
-        if (target != null)
-        {
-            var props = new Hashtable { { playerPropertyKey, true } };
-            target.SetCustomProperties(props);
-        }
+        var props = new ExitGames.Client.Photon.Hashtable { { playerPropertyKey, true } };
+        target.SetCustomProperties(props);
 
         // notificar a todos que fue recogido (se puede enviar actorNr para quien la recogió)
         photonView.RPC(nameof(RPC_OnPickedUp), RpcTarget.AllBuffered, actorNr);
@@ -70,6 +95,15 @@ public class Collectible : MonoBehaviourPun
         if (PhotonNetwork.IsMasterClient && photonView != null)
         {
             PhotonNetwork.Destroy(photonView);
+        }
+    }
+
+    [PunRPC]
+    void RPC_PickupDenied(int actorNr)
+    {
+        if (PhotonNetwork.LocalPlayer.ActorNumber == actorNr)
+        {
+            Debug.Log("Collectible: pickup denegado — ya tenías un collectible.");
         }
     }
 

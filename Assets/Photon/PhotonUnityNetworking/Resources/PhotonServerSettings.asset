@@ -43,6 +43,7 @@ MonoBehaviour:
   - RPC_PickupItem
   - RPC_OnPickedUp
   - RPC_RequestPickup
+  - RPC_PickupDenied
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
