@@ -9,27 +9,38 @@ public class GameSetupController : MonoBehaviourPunCallbacks
 
     private void Start()
     {
-        // VERIFICACIÓN DE SEGURIDAD
-        // Si intentas dar Play directo a esta escena sin pasar por el Menú, esto evitará errores.
+        // Si ya estamos en la sala y Photon listo, esperamos al maze antes de spawnear
         if (PhotonNetwork.IsConnectedAndReady)
         {
-            Debug.Log("Scene Cargada. Instanciando Jugador...");
-            SpawnPlayer();
+            Debug.Log("Scene Cargada. Esperando que el Maze esté listo antes de instanciar jugador...");
+            WaitAndSpawnWhenReady();
             StartCoroutine(PingLoop());
         }
         else
         {
-            // Esperando a que el jugador entre en una sala
             Debug.LogWarning("Esperando a que el jugador entre en una sala...");
         }
     }
 
-    // Este evento se activará si entramos a la escena antes de que la conexión termine de sincronizar
     public override void OnJoinedRoom()
     {
-        Debug.Log("GameSetup: OnJoinedRoom disparado tardíamente. Instanciando ahora.");
-        SpawnPlayer();
+        Debug.Log("GameSetup: OnJoinedRoom disparado tardíamente. Esperando que Maze esté listo antes de instanciar.");
+        WaitAndSpawnWhenReady();
         StartCoroutine(PingLoop());
+    }
+
+    void WaitAndSpawnWhenReady()
+    {
+        // Si el maze ya está generado, spawneamos de inmediato
+        if (MazeGenerator.MazeIsGenerated)
+        {
+            SpawnPlayer();
+            return;
+        }
+
+        // Si no, suscribirnos al evento y spawnear cuando llegue
+        MazeGenerator.OnMazeGenerated -= SpawnPlayer; // defensivo: evitar múltiples subs
+        MazeGenerator.OnMazeGenerated += SpawnPlayer;
     }
 
     private void SpawnPlayer()
@@ -41,6 +52,9 @@ public class GameSetupController : MonoBehaviourPunCallbacks
         PhotonNetwork.Instantiate(playerPrefabName, randomPosition, Quaternion.identity);
 
         Debug.Log("Jugador instanciado correctamente.");
+        // Si usamos PlayerSpawnMarker, este marcará la propiedad 'spawned' automáticamente.
+        // Nos desuscribimos por limpieza
+        MazeGenerator.OnMazeGenerated -= SpawnPlayer;
     }
 
     private IEnumerator PingLoop()

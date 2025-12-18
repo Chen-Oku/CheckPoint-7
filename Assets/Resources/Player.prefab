@@ -20,6 +20,7 @@ GameObject:
   - component: {fileID: -6341522301527899579}
   - component: {fileID: 5458556089246203908}
   - component: {fileID: 4878749791708702763}
+  - component: {fileID: 5168937556527817590}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -282,6 +283,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerNameplateLegacy
   nameTextTMP: {fileID: 4649451492084343004}
   nameTextLegacy: {fileID: 0}
+--- !u!114 &5168937556527817590
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 998340940994573570}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f5b86d0c9ef111429105b163da5fba9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerSpawnMarker
+  playerSpawnedPropKey: spawned
 --- !u!1 &3920327510196267971
 GameObject:
   m_ObjectHideFlags: 0

@@ -172,6 +172,10 @@ public class MazeGenerator : MonoBehaviourPunCallbacks
         }
     }
 
+    // Nueva API pública para que otros componentes esperen al maze
+    public static System.Action OnMazeGenerated;
+    public static bool MazeIsGenerated { get; private set; } = false;
+
     void DoGenerate()
     {
         if (hasGenerated) return;
@@ -220,6 +224,10 @@ public class MazeGenerator : MonoBehaviourPunCallbacks
                 Debug.Log("MazeGenerator: no MazeCollectiblePlacer encontrado; no se colocaron collectibles automáticamente.");
             }
         }
+
+        // NOTIFICAR a quien espere que el maze ya está listo
+        MazeIsGenerated = true;
+        OnMazeGenerated?.Invoke();
     }
 
     private void GenerateMaze(MazeCell previousCell, MazeCell currentCell)
