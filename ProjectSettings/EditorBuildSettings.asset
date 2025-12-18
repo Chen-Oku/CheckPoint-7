@@ -9,10 +9,10 @@ EditorBuildSettings:
     path: Assets/Scenes/01_MenuScene.unity
     guid: 706a19d16d01b9542a07cb8a2915232d
   - enabled: 1
-    path: Assets/Scenes/01-5_WaitScene.unity
+    path: Assets/Scenes/02_GameScene.unity
     guid: 8c71904298bdb45428b4523509022481
   - enabled: 1
-    path: Assets/Scenes/02_GameScene.unity
+    path: Assets/Scenes/03_WaitScene.unity
     guid: 44640454f26a6b2429ffef97fdee7c31
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: 18e35394db1a7e54d877e5ba59dce625, type: 2}

@@ -45,7 +45,7 @@ public class LobbyUIManager : MonoBehaviour
         string name = roomNameInput.text;
         if (string.IsNullOrEmpty(name)) return;
 
-        int maxPlayers = 4;
+        int maxPlayers = 2;
         if (maxPlayersInput != null && !string.IsNullOrEmpty(maxPlayersInput.text))
         {
             int.TryParse(maxPlayersInput.text, out maxPlayers);
