@@ -104,7 +104,22 @@ public class LobbyRoomManager : MonoBehaviourPunCallbacks
 
         // No cargamos la escena aquí al entrar: el MasterClient iniciará la partida
         // cuando la sala esté completa (ver OnPlayerEnteredRoom).
-        Debug.Log($"Sala MaxPlayers={PhotonNetwork.CurrentRoom.MaxPlayers}, PlayerCount={PhotonNetwork.CurrentRoom.PlayerCount}");
+        int current = PhotonNetwork.CurrentRoom.PlayerCount;
+        int capacity = PhotonNetwork.CurrentRoom.MaxPlayers;
+        Debug.Log($"Sala MaxPlayers={capacity}, PlayerCount={current}");
+
+        // Mostrar pantalla de espera si la sala no está completa
+        if (WaitingScreenController.Instance != null)
+        {
+            if (current < capacity)
+            {
+                WaitingScreenController.Instance.Show("Esperando que se unan más jugadores...");
+            }
+            else
+            {
+                WaitingScreenController.Instance.Hide();
+            }
+        }
     }
 
     public override void OnPlayerEnteredRoom(Player newPlayer)
@@ -122,6 +137,7 @@ public class LobbyRoomManager : MonoBehaviourPunCallbacks
         if (current >= capacity)
         {
             Debug.Log("Room completa — MasterClient cargando escena de juego");
+            WaitingScreenController.Instance?.Show("Sala completa — iniciando partida...");
             PhotonNetwork.LoadLevel("02_GameScene");
         }
     }
