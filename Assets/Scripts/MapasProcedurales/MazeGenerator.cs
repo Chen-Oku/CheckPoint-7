@@ -36,6 +36,7 @@ public class MazeGenerator : MonoBehaviourPunCallbacks
     public string playerSpawnedPropKey = "spawned";
 
     bool hasGenerated = false;
+    bool gameFinishedHandled = false;
 
     void Start()
     {
@@ -157,9 +158,9 @@ public class MazeGenerator : MonoBehaviourPunCallbacks
     public override void OnRoomPropertiesUpdate(ExitGames.Client.Photon.Hashtable propertiesThatChanged)
     {
         base.OnRoomPropertiesUpdate(propertiesThatChanged);
-        if (hasGenerated) return;
         if (propertiesThatChanged == null) return;
-        if (propertiesThatChanged.ContainsKey("mazeSeed"))
+
+        if (propertiesThatChanged.ContainsKey("mazeSeed") && !hasGenerated)
         {
             object obj = null;
             if (PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue("mazeSeed", out obj))
@@ -168,6 +169,23 @@ public class MazeGenerator : MonoBehaviourPunCallbacks
                 Debug.Log($"MazeGenerator: recibida mazeSeed={seed} por OnRoomPropertiesUpdate, generando...");
                 Random.InitState(seed);
                 DoGenerate();
+            }
+        }
+
+        // Si alguien marcó la propiedad 'gameFinishedBy', el MasterClient debe cargar la escena de menú para todos
+        if (propertiesThatChanged.ContainsKey("gameFinishedBy") && !gameFinishedHandled)
+        {
+            object actorObj = null;
+            if (PhotonNetwork.CurrentRoom != null && PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue("gameFinishedBy", out actorObj))
+            {
+                int actorNr = (int)actorObj;
+                Debug.Log($"MazeGenerator: detectado gameFinishedBy={actorNr} por OnRoomPropertiesUpdate.");
+                gameFinishedHandled = true;
+                if (PhotonNetwork.IsMasterClient)
+                {
+                    Debug.Log("MasterClient cargando escena de menú para todos (game finished).");
+                    PhotonNetwork.LoadLevel("01_MenuScene");
+                }
             }
         }
     }

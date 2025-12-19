@@ -6,6 +6,8 @@ using System.Collections;
 public class GameSetupController : MonoBehaviourPunCallbacks
 {
     [SerializeField] private string playerPrefabName = "Player";
+    [Header("Scene UI")]
+    [SerializeField] private SceneWaitingScreen sceneWaitingScreen;
 
     private void Start()
     {
@@ -13,7 +15,7 @@ public class GameSetupController : MonoBehaviourPunCallbacks
         if (PhotonNetwork.IsConnectedAndReady)
         {
             Debug.Log("Scene Cargada. Esperando que el Maze esté listo antes de instanciar jugador...");
-            WaitingScreenController.Instance?.Show("Esperando que el laberinto esté listo...");
+            sceneWaitingScreen?.Show("Esperando que el laberinto esté listo...");
             WaitAndSpawnWhenReady();
             StartCoroutine(PingLoop());
         }
@@ -26,7 +28,7 @@ public class GameSetupController : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
         Debug.Log("GameSetup: OnJoinedRoom disparado tardíamente. Esperando que Maze esté listo antes de instanciar.");
-        WaitingScreenController.Instance?.Show("Esperando que el laberinto esté listo...");
+        sceneWaitingScreen?.Show("Esperando que el laberinto esté listo...");
         WaitAndSpawnWhenReady();
         StartCoroutine(PingLoop());
     }
@@ -54,7 +56,7 @@ public class GameSetupController : MonoBehaviourPunCallbacks
         PhotonNetwork.Instantiate(playerPrefabName, randomPosition, Quaternion.identity);
 
         Debug.Log("Jugador instanciado correctamente.");
-        WaitingScreenController.Instance?.Hide();
+        sceneWaitingScreen?.Hide();
         // Si usamos PlayerSpawnMarker, este marcará la propiedad 'spawned' automáticamente.
         // Nos desuscribimos por limpieza
         MazeGenerator.OnMazeGenerated -= SpawnPlayer;

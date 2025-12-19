@@ -15,9 +15,19 @@ public class NameplateBillboard : MonoBehaviour
 
     Camera cam;
 
+    [Header("Locking")]
+    [Tooltip("If true, the nameplate will keep a fixed world rotation and will NOT rotate with the player.")]
+    public bool keepStaticRotation = false;
+
+    [Tooltip("World Euler rotation to lock to when 'keepStaticRotation' is true. Default points 'up'.")]
+    public Vector3 lockedWorldEuler = new Vector3(-90f, 0f, 0f);
+
+    private Quaternion lockedRotation;
+
     void OnEnable()
     {
         cam = ResolveCamera();
+        lockedRotation = Quaternion.Euler(lockedWorldEuler);
     }
 
     Camera ResolveCamera()
@@ -72,6 +82,12 @@ public class NameplateBillboard : MonoBehaviour
     {
         if (cam == null) cam = ResolveCamera();
         if (cam == null) return;
+        // If requested, keep a fixed world rotation (prevents rotation following the parent/player)
+        if (keepStaticRotation)
+        {
+            transform.rotation = lockedRotation;
+            return;
+        }
 
         Vector3 cameraPos = cam.transform.position;
         Vector3 dir = cameraPos - transform.position;

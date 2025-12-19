@@ -13,6 +13,9 @@ public class LobbyRoomManager : MonoBehaviourPunCallbacks
     public Action OnJoinedGameRoom;
     public Action<List<RoomInfo>> OnRoomListUpdateEvent;
 
+    [Header("Scene UI")]
+    [SerializeField] private SceneWaitingScreen sceneWaitingScreen;
+
     // CACHÉ DE SALAS
     private Dictionary<string, RoomInfo> cachedRoomList = new Dictionary<string, RoomInfo>();
 
@@ -108,17 +111,11 @@ public class LobbyRoomManager : MonoBehaviourPunCallbacks
         int capacity = PhotonNetwork.CurrentRoom.MaxPlayers;
         Debug.Log($"Sala MaxPlayers={capacity}, PlayerCount={current}");
 
-        // Mostrar pantalla de espera si la sala no está completa
-        if (WaitingScreenController.Instance != null)
+        // Mostrar pantalla de espera si la sala no está completa (panel por escena)
+        if (sceneWaitingScreen != null)
         {
-            if (current < capacity)
-            {
-                WaitingScreenController.Instance.Show("Esperando que se unan más jugadores...");
-            }
-            else
-            {
-                WaitingScreenController.Instance.Hide();
-            }
+            if (current < capacity) sceneWaitingScreen.Show("Esperando que se unan más jugadores...");
+            else sceneWaitingScreen.Hide();
         }
     }
 
@@ -137,7 +134,7 @@ public class LobbyRoomManager : MonoBehaviourPunCallbacks
         if (current >= capacity)
         {
             Debug.Log("Room completa — MasterClient cargando escena de juego");
-            WaitingScreenController.Instance?.Show("Sala completa — iniciando partida...");
+            sceneWaitingScreen?.Show("Sala completa — iniciando partida...");
             PhotonNetwork.LoadLevel("02_GameScene");
         }
     }

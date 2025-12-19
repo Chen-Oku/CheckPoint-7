@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using UnityEngine.SceneManagement;
 using Photon.Pun;
+using ExitGames.Client.Photon;
 
 public class GoalTrigger : MonoBehaviour
 {
@@ -40,9 +41,13 @@ public class GoalTrigger : MonoBehaviour
         var mr = GetComponent<MeshRenderer>();
         if (mr != null) mr.material.color = Color.green;
 
-        // Si quieres sincronizar cambio de escena para todos, haz que el MasterClient invoque PhotonNetwork.LoadLevel(...)
-        // Aquí se carga localmente:
-        StartCoroutine(NextLevel());
+        // Notificamos al MasterClient que alguien llegó al goal usando propiedades de sala.
+        // El MasterClient será responsable de cargar la escena para todos con PhotonNetwork.LoadLevel.
+        if (PhotonNetwork.CurrentRoom != null)
+        {
+            var props = new ExitGames.Client.Photon.Hashtable { { "gameFinishedBy", PhotonNetwork.LocalPlayer.ActorNumber } };
+            PhotonNetwork.CurrentRoom.SetCustomProperties(props);
+        }
     }
 
     IEnumerator NextLevel()

@@ -44,6 +44,8 @@ MonoBehaviour:
   - RPC_OnPickedUp
   - RPC_RequestPickup
   - RPC_PickupDenied
+  - RPC_ApplyColorIndex
+  - RPC_RequestColor
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
